@@ -1,0 +1,16 @@
+{
+    "name": "ekelly/interactive-map",
+    "description": "Interactive Map wordpress plugin",
+    "autoload": {
+        "psr-4": {
+            "Ekelly\\InteractiveMap\\": "includes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ejay010",
+            "email": "ejay010@gmail.com"
+        }
+    ],
+    "require": {}
+}
