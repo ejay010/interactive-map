@@ -1,0 +1,35 @@
+.interactive-map-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.map {
+    flex: 3;
+}
+
+.map svg {
+    width: 100%;
+    height: auto;
+}
+
+#plant-sidebar {
+    flex: 1;
+    min-width: 300px;
+    border-left: 1px solid #ddd;
+    padding-left: 20px;
+    min-height: 600px;
+}
+
+#plants-results p {
+    margin-bottom: 15px;
+}
+
+#plants-results a {
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#plants-results a:hover {
+    text-decoration: underline;
+}
