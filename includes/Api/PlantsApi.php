@@ -15,21 +15,34 @@ class PlantsApi
     {
         register_rest_route(
             'interactive-map/v1',
-            '/plants/(?P<island>[A-Z0-9]+)',
+            '/plants/(?P<region>[A-Za-z0-9_-]+)',
             [
                 'methods' => 'GET',
-                'callback' => [$this, 'getPlants'],
+                'callback' => [$this, 'plantsByRegion'],
                 'permission_callback' => '__return_true',
+            ]
+            );
+
+        register_rest_route(
+            'interactive-map/v1',
+            '/plants',
+            [
+                'methods' => 'GET',
+                'callback' => [$this, 'allPlants'],
+                'permission_callback' => '__return_true'
             ]
             );
     }
 
-    public function getPlants($request)
+    public function allPlants()
     {
-        $repository = new PlantRepository();
+        return (new PlantRepository())->getAllPlants();
+    }
 
-        return $repository->getPlantsByIsland(
-            $request['island']
+    public function plantsByRegion($request)
+    {
+        return (new PlantRepository())->getPlantsByRegion(
+            $request['region']
         );
     }
 }

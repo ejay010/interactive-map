@@ -1,40 +1,64 @@
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#features path').forEach(region => {
+document.addEventListener('DOMContentLoaded', init);
+
+function init() {
+    attachRegionEvents();
+    loadPlants();
+}
+
+function loadPlants(region = null) {
+    let endpoint = '/wp-json/interactive-map/v1/plants';
+
+    if (region) {
+        endpoint += '/' + region;
+    }
+
+    fetch(endpoint)
+        .then(r => r.json())
+        .then(renderPlants)
+        .catch(error => console.error(error));
+}
+
+function renderPlants(plants) {
+
+    const container = document.getElementById('plant-results');
+
+    if (!plants.length) {
+        container.innerHTML = '<p>No Plants Found.</p>';
+        return;
+    }
+
+    let html = '';
+
+    plants.forEach(plant => {
+        html += `
+        <div class="plant">
+            <a href="${plant.url}">
+                ${plant.title}
+            </a>
+            <br/>
+            <small>${plant.family}</small>
+        </div>
+        `;
+    })
+
+    container.innerHTML = html;
+}
+
+function attachRegionEvents() {
+    document.querySelectorAll('[data-region], svg path').forEach(path => {
+        path.classList.remove('selected');
+    });
+
+    document.querySelectorAll('[data-region], svg path').forEach(region => {
         region.style.cursor = 'pointer';
 
-        region.addEventListener('mouseenter', () => {
-            region.style.fill = '#4CAF50';
-        });
-
-        region.addEventListener('mouseleave', () => {
-            region.style.fill = '';
-        });
-
         region.addEventListener('click', () => {
-            fetch(`/wp-json/interactive-map/v1/plants/${region.id}`)
-                .then(response => response.json())
-                .then(plants => {
-                    const results = document.getElementById('plant-results');
 
-                    results.innerHTML = '';
+            region.classList.add('selected');
 
-                    if (plants.length === 0) {
-                        results.innerHTML = '<p>No plants found.</p>';
+            const regionId = region.dataset.region || region.id;
 
-                        return;
-                    }
-
-                    plants.forEach(plant => {
-                        results.innerHTML += `
-                        <p>
-                            <a href="${plant.url}">
-                                ${plant.title}
-                            </a></br>
-                            <small>${plant.family}</small>
-                        </p>
-                        `;
-                    })
-                });
-        });
-    });
-});
+            loadPlants(regionId);
+        })
+    })
+}

@@ -2,6 +2,8 @@
 
 namespace Ekelly\InteractiveMap\Repository;
 
+use WP_Query;
+
 class PlantRepository
 {
     protected $wpdb;
@@ -16,52 +18,106 @@ class PlantRepository
 
     public function findPageByPlantName(string $plantName): ?int
     {
-        $page = get_page_by_title($plantName, OBJECT, 'page');
+        $pageId = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "
+                    SELECT ID
+                    FROM {$this->wpdb->posts}
+                    WHERE post_title = %s
+                    AND post_type = 'page'
+                    AND post_status = 'publish'
+                    LIMIT 1
+                ",
+                $plantName
+            )
+            );
 
-        if (!$page) {
-            return null;
-        }
-
-        return (int) $page->ID;
+            return $pageId ? (int) $pageId : null;
     }
 
-    public function save(
+    public function upsertRelationship(
         int $pageId,
-        string $islandCode,
+        string $regionId,
         string $family
-    ) {
-        global $wpdb;
+    ): void {
+        $exists = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "
+                    SELECT id
+                    FROM {$this->table}
+                    WHERE page_id = %d
+                    AND region_id = %s
+                ",
+                $pageId,
+                $regionId
+            )
+            );
 
-        $wpdb->insert(
+            if ($exists) {
+                return;
+            }
+
+       $this->wpdb->insert(
             $this->table,
             [
                 'page_id' => $pageId,
-                'island_code' => $islandCode,
+                'region_id' => $regionId,
                 'plant_family' => $family,
             ]
             );
     }
 
-    public function getPlantsByIsland(string $islandCode): array
+    public function getPlantsByRegion(string $regionId): array
     {
         $results =  $this->wpdb->get_results(
             $this->wpdb->prepare(
                 "
                 SELECT page_id, plant_family
                 FROM {$this->table}
-                WHERE island_code = %s
+                WHERE region_id = %s
+                ORDER BY page_id
                 ",
-                $islandCode
+                $regionId
             ),
+            
             ARRAY_A
+
             );
 
-            return array_map(function ($plant) {
-                return [
-                    'title' => get_the_title($plant['page_id']),
-                    'url' => get_permalink($plant['page_id']),
-                    'family' => $plant['plant_family']
-                ];
-            }, $results);
+            return $this->formatPlants($results);
+    }
+
+    public function getAllPlants(): array
+    {
+        $results = $this->wpdb->get_results(
+            "
+            SELECT DISTINCT page_id, plant_family
+            FROM {$this->table}
+            ORDER BY page_id
+            ",
+            ARRAY_A
+        );
+
+        return $this->formatPlants($results);
+    }
+
+    private function formatPlants(array $results): array
+    {
+        return array_map(function ($plant) {
+            return [
+                'page_id' => (int) $plant['page_id'],
+
+                'title' => get_the_title($plant['page_id']),
+
+                'url' => get_permalink($plant['page_id']),
+
+                'family' => $plant['plant_family'],
+
+                'thumbnail' => get_the_post_thumbnail_url(
+                    $plant['page_id'],
+                    'thumbnail'
+                )
+            ];
+        }, $results);
     }
 }

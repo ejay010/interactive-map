@@ -1,9 +1,5 @@
-<div class="interactive-map">
-
-    <h2>Bahamas Interactive Map</h2>
-
-    <p>This map is being rendered by a shortcode.</p>
-
+<div class="interactive-map-container">
+    
     <div class="map">
         <?= file_get_contents(IM_PLUGIN_PATH . 'assets/svg/bs.svg'); ?>
     </div>
