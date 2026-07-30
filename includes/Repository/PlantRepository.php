@@ -16,25 +16,6 @@ class PlantRepository
         $this->table = $wpdb->prefix . 'interactive_map_plants';
     }
 
-    public function findPageByPlantName(string $plantName): ?int
-    {
-        $pageId = $this->wpdb->get_var(
-            $this->wpdb->prepare(
-                "
-                    SELECT ID
-                    FROM {$this->wpdb->posts}
-                    WHERE post_title = %s
-                    AND post_type = 'page'
-                    AND post_status = 'publish'
-                    LIMIT 1
-                ",
-                $plantName
-            )
-            );
-
-            return $pageId ? (int) $pageId : null;
-    }
-
     public function upsertRelationship(
         int $pageId,
         string $regionId,

@@ -3,6 +3,7 @@
 namespace Ekelly\InteractiveMap;
 
 use Ekelly\InteractiveMap\Admin\Admin;
+use Ekelly\InteractiveMap\Admin\ImportPage;
 use Ekelly\InteractiveMap\Api\PlantsApi;
 use Ekelly\InteractiveMap\Assets\Assets;
 use Ekelly\InteractiveMap\Frontend\Shortcode;
@@ -29,6 +30,6 @@ class Plugin
         add_action('init', [$assets, 'register']);
 
         $api = new PlantsApi();
-        add_action('init', [$api, 'register']);
+        add_action('rest_api_init', [$api, 'register']);
      }
 }

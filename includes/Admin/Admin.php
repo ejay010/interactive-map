@@ -15,6 +15,7 @@ class Admin {
             25
         );
 
+        (new ImportPage())->register();
     }
 
     public function dashboard() {
