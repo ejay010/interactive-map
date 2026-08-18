@@ -17,6 +17,9 @@ class CsvReader
         }
 
         $headers = fgetcsv($handle);
+        $headers = array_map(function ($header) {
+            return trim(preg_replace('/^\xEF\xBB\xBF/', '', $header));
+        }, $headers);
 
         if (!$headers) {
             fclose($handle);

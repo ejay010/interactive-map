@@ -6,11 +6,6 @@ use Ekelly\InteractiveMap\Repository\PlantRepository;
 
 class PlantsApi
 {
-    public function register()
-    {
-        add_action('rest_api_init', [$this, 'routes']);
-    }
-
     public function routes()
     {
         register_rest_route(

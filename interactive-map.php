@@ -17,4 +17,6 @@ define('IM_VERSION', '1.0.0');
 
 require_once __DIR__ . '/vendor/autoload.php';
 register_activation_hook(__FILE__, [Activator::class, 'activate']);
-(new Ekelly\InteractiveMap\Plugin())->boot();
+add_action('plugins_loaded', function() {
+    (new Ekelly\InteractiveMap\Plugin())->boot();
+});

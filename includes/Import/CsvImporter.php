@@ -2,6 +2,7 @@
 
 namespace Ekelly\InteractiveMap\Import;
 
+use Ekelly\InteractiveMap\Repository\PageRepository;
 use Ekelly\InteractiveMap\Repository\PlantRepository;
 use Ekelly\InteractiveMap\Services\PlantMatcher;
 
@@ -14,15 +15,15 @@ class CsvImporter
         
         (new CsvValidator())->validate($rows);
         
-        $repository = new PlantRepository();
-        $matcher = new PlantMatcher();
+        $plantrepository = new PlantRepository();
+        $pagerepository = new PageRepository();
 
         $result = new ImportResult();
 
         foreach ($rows as $row) {
             $result->processed();
 
-            $pageId = $matcher->find(
+            $pageId = $pagerepository->findByTitle(
                 $row['plant_name']
             );
 
@@ -32,13 +33,20 @@ class CsvImporter
                 continue;
             }
 
-            $repository->upsertRelationship(
-                $pageId,
-                $row['region_id'],
-                $row['plant_family']
-            );
+            $regions = array_map('trim', explode(',', $row['region_id']));
 
-            $result->imported();
+            foreach ($regions as $regionId) {
+                if($plantrepository->upsertRelationship(
+                    $pageId,
+                    $regionId,
+                    trim($row['plant_family'])
+                )) {
+                    $result->imported();
+                } else {
+                    $result->skipped();
+                }
+            }
+
         }
 
         return $result;

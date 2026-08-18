@@ -9,7 +9,7 @@ class ImportPage
     public function register(): void
     {
         add_submenu_page(
-            'tools.php',
+            'interactive-map',
             'Import Plant Data',
             'Import Plant Data',
             'manage_options',
@@ -76,7 +76,20 @@ class ImportPage
                     <li>Processed: <?php echo esc_html($summary['processed']); ?></li>
                     <li>Imported: <?php echo esc_html($summary['imported']); ?></li>
                     <li>Skipped: <?php echo esc_html($summary['skipped']); ?></li>
+                    <li>Missing Pages: <?php echo esc_html(count($summary['missing']))?></li>
                 </ul>
+                <?php
+                if (count($summary['missing']) > 0) {
+                    echo '<ul>';
+                    
+                    foreach ($summary['missing'] as $plant) {
+                    echo '<li>' . esc_html($plant) .'</li>';
+                    }
+                    
+                    echo '</ul>';
+                } 
+                
+                ?>
             </div>
             <?php
 

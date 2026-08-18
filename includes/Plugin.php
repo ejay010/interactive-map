@@ -14,22 +14,48 @@ class Plugin
 {
     public function boot()
     {
-        $admin = new Admin;
-        add_action('admin_menu', [$admin, 'registerMenu']);
+       
+        $this->registerAdmin();
 
+        $this->registerShortCode();
+
+        $this->registerPlants();
+
+        $this->registerIslands();
+
+        $this->registerAssets();
+
+        $this->registerApi();
+     }
+
+     public function registerAdmin(): void
+     {
+         $admin = new Admin;
+        add_action('admin_menu', [$admin, 'registerMenu']);
+     }
+
+     public function registerShortCode() : void {
         $shortcode = new Shortcode();
         add_action('init', [$shortcode, 'register']);
+     }
 
+     public function registerPlants() : void {
         $plant = new Plant;
         add_action('init', [$plant, 'register']);
+     }
 
+    public function registerIslands() : void {
         $island = new Island;
         add_action('init', [$island, 'register']);
+     }
 
+     public function registerAssets() : void {
         $assets = new Assets;
         add_action('init', [$assets, 'register']);
+     }
 
+     public function registerApi() : void {
         $api = new PlantsApi();
-        add_action('rest_api_init', [$api, 'register']);
+        add_action('rest_api_init', [$api, 'routes']);
      }
 }

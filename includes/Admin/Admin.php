@@ -9,7 +9,7 @@ class Admin {
             'Interactive Maps',
             'Interactive Maps',
             'manage_options',
-            'insteractive-map',
+            'interactive-map',
             [$this, 'dashboard'],
             'dashicons-location',
             25
