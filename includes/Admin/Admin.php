@@ -15,6 +15,7 @@ class Admin {
             25
         );
 
+        (new ManagePlantsPage())->register();
         (new ImportPage())->register();
     }
 

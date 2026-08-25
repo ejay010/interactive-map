@@ -10,13 +10,23 @@ class PlantsApi
     {
         register_rest_route(
             'interactive-map/v1',
+            '/plants/counts',
+            [
+                'methods' => 'GET',
+                'callback' => [$this, 'plantCounts'],
+                'permission_callback' => '__return_true',
+            ]
+        );
+
+        register_rest_route(
+            'interactive-map/v1',
             '/plants/(?P<region>[A-Za-z0-9_-]+)',
             [
                 'methods' => 'GET',
                 'callback' => [$this, 'plantsByRegion'],
                 'permission_callback' => '__return_true',
             ]
-            );
+        );
 
         register_rest_route(
             'interactive-map/v1',
@@ -26,7 +36,12 @@ class PlantsApi
                 'callback' => [$this, 'allPlants'],
                 'permission_callback' => '__return_true'
             ]
-            );
+        );
+    }
+
+    public function plantCounts()
+    {
+        return (new PlantRepository())->getPlantCountsByRegion();
     }
 
     public function allPlants()

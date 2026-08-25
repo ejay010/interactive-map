@@ -23,12 +23,12 @@ class ImportPage
         ?>
         <div class="wrap">
             <h1>Import Plant Data</h1>
-            <p>Your CSV must contain the following columns:</p>
+            <p>Your CSV must contain the following columns (or their aliases):</p>
             
             <ul>
-                <li>plant_name</li>
-                <li>plant_family</li>
-                <li>region_id</li>
+                <li><strong>Species</strong> (or <code>plant_name</code>)</li>
+                <li><strong>Family</strong> (or <code>plant_family</code>)</li>
+                <li><strong>Island Grouping</strong> (or <code>region_id</code>)</li>
             </ul>
             
             <?php $this->handleImport(); ?>

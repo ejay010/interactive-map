@@ -2,54 +2,61 @@
 
 namespace Ekelly\InteractiveMap\Import;
 
-use Ekelly\InteractiveMap\Repository\PageRepository;
 use Ekelly\InteractiveMap\Repository\PlantRepository;
-use Ekelly\InteractiveMap\Services\PlantMatcher;
 
 class CsvImporter
 {
     public function import(string $file): ImportResult
     {
+        // Ensure database table schema is created / migrated
+        \Ekelly\InteractiveMap\Database\Activator::activate();
+
         $reader = new CsvReader();
         $rows = $reader->read($file);
         
         (new CsvValidator())->validate($rows);
         
-        $plantrepository = new PlantRepository();
-        $pagerepository = new PageRepository();
-
+        $plantRepository = new PlantRepository();
         $result = new ImportResult();
 
         foreach ($rows as $row) {
             $result->processed();
 
-            $pageId = $pagerepository->findByTitle(
-                $row['plant_name']
-            );
+            $plantName   = trim($row['Species'] ?? $row['plant_name'] ?? '');
+            $plantFamily = trim($row['Family'] ?? $row['plant_family'] ?? '');
+            $rawRegions  = $row['Island Grouping'] ?? $row['region_id'] ?? '';
+            $plantUrl    = trim($row['url'] ?? $row['URL'] ?? $row['link'] ?? $row['Link'] ?? '');
 
-            if (!$pageId) {
-                $result->missing($row['plant_name']);
-
+            if (empty($plantName)) {
                 continue;
             }
 
-            $regions = array_map('trim', explode(',', $row['region_id']));
+            // Find or create unique plant species record
+            $plantId = $plantRepository->findOrCreatePlant($plantName, $plantFamily, $plantUrl);
 
-            foreach ($regions as $regionId) {
-                if($plantrepository->upsertRelationship(
-                    $pageId,
-                    $regionId,
-                    trim($row['plant_family'])
-                )) {
-                    $result->imported();
-                } else {
-                    $result->skipped();
+            $regions = array_map('trim', explode(',', $rawRegions));
+            $anyLinked = false;
+
+            foreach ($regions as $region) {
+                // Strip trailing punctuation (e.g. "20." -> "20")
+                $regionId = trim(preg_replace('/[^0-9A-Za-z_-]/', '', $region));
+
+                if (empty($regionId)) {
+                    continue;
+                }
+
+                if ($plantRepository->linkPlantToRegion($plantId, $regionId)) {
+                    $anyLinked = true;
                 }
             }
 
+            if ($anyLinked) {
+                $result->imported();
+            } else {
+                $result->skipped();
+            }
         }
 
         return $result;
-
     }
 }

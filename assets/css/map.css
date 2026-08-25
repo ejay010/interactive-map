@@ -13,11 +13,51 @@
     height: auto;
 }
 
-svg path.selected {
-    stroke: #000;
-    stroke-width: 2;
-    opacity: 0.8;
+svg path.selected,
+svg polygon.selected {
+    stroke: #000000;
+    stroke-width: 1.5px;
+    fill: #2e7d32;
+    opacity: 0.85;
 }
+
+/* Ensure grid lines, frame, sea, and non-island layers do not block island clicks */
+svg line,
+svg polyline,
+svg #FRAME,
+svg #SEA,
+svg #MERIDIANS,
+svg #OTHER_CAPTIONS,
+svg #CAPTIONS_SEA,
+svg #CAPTIONS_HYDROGRAPHY,
+svg #CAPTIONS_COUNTRIES {
+    pointer-events: none;
+}
+
+svg #CAPTIONS_ISLANDS,
+svg #CAPTIONS_ISLANDS text,
+svg #CAPTIONS_ISLANDS tspan,
+svg #CAPTIONS_TOWNS,
+svg #CAPTIONS_TOWNS text,
+svg #CAPTIONS_TOWNS tspan,
+svg text[data-region],
+svg tspan[data-region],
+svg [data-region] text,
+svg [data-region] tspan {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    transition: fill 0.2s ease-in-out;
+}
+
+svg text[data-region]:hover,
+svg tspan[data-region]:hover,
+svg #CAPTIONS_ISLANDS text:hover,
+svg #CAPTIONS_TOWNS text:hover {
+    fill: #1b5e20 !important;
+}
+
+
+
 
 #plant-sidebar {
     flex: 1;
@@ -27,15 +67,128 @@ svg path.selected {
     min-height: 600px;
 }
 
-#plants-results p {
-    margin-bottom: 15px;
+.sidebar-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
 }
 
-#plants-results a {
-    text-decoration: none;
-    font-weight: bold;
+.header-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-#plants-results a:hover {
-    text-decoration: underline;
+#plant-sidebar h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1b5e20;
+}
+
+.plant-count-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 12px;
+    border: 1px solid #c8e6c9;
+}
+
+.plant-count-summary {
+    font-size: 0.85rem;
+    color: #555555;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.show-all-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    background-color: transparent;
+    border: 1px solid #2e7d32;
+    color: #2e7d32;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.show-all-btn:hover {
+    background-color: #2e7d32;
+    color: #ffffff;
+}
+
+.plant-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease-in-out;
+}
+
+.plant-card:hover {
+    border-color: #2e7d32;
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.plant-details {
+    flex: 1;
+    padding-right: 12px;
+}
+
+.plant-title {
+    margin: 0 0 4px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #222222;
+    line-height: 1.3;
+}
+
+.plant-family {
+    display: block;
+    font-size: 0.82rem;
+    color: #666666;
+    font-style: italic;
+}
+
+.view-plant-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    background-color: #2e7d32;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.view-plant-btn:hover {
+    background-color: #1b5e20;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+.no-plants {
+    font-size: 0.95rem;
+    color: #777777;
+    font-style: italic;
 }
