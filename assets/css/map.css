@@ -137,6 +137,9 @@ svg [data-region] tspan {
     padding-left: 20px;
     min-height: 600px;
     scroll-margin-top: 24px;
+    position: sticky;
+    top: 24px;
+    align-self: flex-start;
 }
 
 .sidebar-header-row {
@@ -287,6 +290,35 @@ svg [data-region] tspan {
     font-style: italic;
 }
 
+#plant-results {
+    max-height: 520px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+    margin-top: 8px;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #a5d6a7 #f1f8e9;
+}
+
+#plant-results::-webkit-scrollbar {
+    width: 6px;
+}
+
+#plant-results::-webkit-scrollbar-track {
+    background: #f1f8e9;
+    border-radius: 4px;
+}
+
+#plant-results::-webkit-scrollbar-thumb {
+    background: #81c784;
+    border-radius: 4px;
+}
+
+#plant-results::-webkit-scrollbar-thumb:hover {
+    background: #2e7d32;
+}
+
 /* ==========================================================================
    Responsive Breakpoints for Mobile and Tablet
    ========================================================================== */
@@ -307,6 +339,7 @@ svg [data-region] tspan {
     }
 
     #plant-sidebar {
+        position: static;
         width: 100%;
         min-width: 100%;
         border-left: none;
@@ -314,6 +347,11 @@ svg [data-region] tspan {
         padding-left: 0;
         padding-top: 1.5rem;
         min-height: auto;
+    }
+
+    #plant-results {
+        max-height: 420px;
+        padding-right: 4px;
     }
 }
 

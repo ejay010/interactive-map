@@ -14,7 +14,8 @@ class Plugin
 {
     public function boot()
     {
-       
+        $this->checkDatabase();
+
         $this->registerAdmin();
 
         $this->registerShortCode();
@@ -26,6 +27,14 @@ class Plugin
         $this->registerAssets();
 
         $this->registerApi();
+     }
+
+     private function checkDatabase(): void
+     {
+         if (get_option('interactive_map_db_version') !== IM_VERSION) {
+             \Ekelly\InteractiveMap\Database\Activator::activate();
+             update_option('interactive_map_db_version', IM_VERSION);
+         }
      }
 
      public function registerAdmin(): void

@@ -14,8 +14,6 @@ class Shortcode
     }
 
     public function render() {
-        (new Assets())->enqueue();
-
         ob_start();
 
         require IM_PLUGIN_PATH . 'templates/frontend/map.php';

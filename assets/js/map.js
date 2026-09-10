@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
 
 const REGION_NAMES = {
     '1': 'Turks & Caicos',
@@ -108,7 +112,12 @@ function updateIslandDropdownCounts() {
 
 function loadRegionCounts() {
     apiFetch('/plants/counts')
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) {
+                throw new Error(`HTTP ${r.status} ${r.statusText}`);
+            }
+            return r.json();
+        })
         .then(data => {
             if (data && data.regions) {
                 regionCounts = data.regions;
@@ -116,7 +125,7 @@ function loadRegionCounts() {
                 updateIslandDropdownCounts();
             }
         })
-        .catch(err => console.error('Error fetching region counts:', err));
+        .catch(err => console.error('[InteractiveMap] Error fetching region counts:', err));
 }
 
 function updateRegionTooltips() {
@@ -188,15 +197,30 @@ function loadPlants(region = null) {
     const subpath = region ? `/plants/${encodeURIComponent(region)}` : '/plants';
 
     apiFetch(subpath)
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) {
+                throw new Error(`HTTP ${r.status} ${r.statusText}`);
+            }
+            return r.json();
+        })
         .then(renderPlants)
-        .catch(error => console.error(error));
+        .catch(error => {
+            console.error('[InteractiveMap] Error loading plants:', error);
+            const container = document.getElementById('plant-results');
+            if (container) {
+                container.innerHTML = '<p class="no-plants">Unable to load plant data. Please check connection.</p>';
+            }
+        });
 }
 
 function renderPlants(plants) {
     const container = document.getElementById('plant-results');
     const countBadge = document.getElementById('plant-count-badge');
     const summaryContainer = document.getElementById('plant-count-summary');
+
+    if (container) {
+        container.scrollTop = 0;
+    }
 
     const plantCount = plants ? plants.length : 0;
 
