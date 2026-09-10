@@ -15,7 +15,7 @@ class Island
                     'singular_name' => 'Island'
                 ],
 
-                'hierarchial' => false,
+                'hierarchical' => false,
                 'show_in_rest' => true,
                 'rewrite' => [
                     'slug' => 'island'

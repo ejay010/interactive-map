@@ -33,19 +33,87 @@ let regionCounts = {};
 let currentRegionId = null;
 
 function init() {
+    setupIslandDropdown();
     attachRegionEvents();
     setupShowAllButton();
     loadRegionCounts();
     loadPlants();
 }
 
+function getApiEndpoint(subpath = '') {
+    const config = window.interactiveMapConfig || {};
+    const base = config.apiUrl || '/wp-json/interactive-map/v1';
+
+    if (subpath && !subpath.startsWith('/')) {
+        subpath = '/' + subpath;
+    }
+
+    if (base.includes('?')) {
+        const [url, query] = base.split('?');
+        const params = new URLSearchParams(query);
+        const restRoute = params.get('rest_route') || '';
+        params.set('rest_route', restRoute.replace(/\/$/, '') + subpath);
+        return `${url}?${params.toString()}`;
+    }
+
+    return base.replace(/\/$/, '') + subpath;
+}
+
+function apiFetch(subpath) {
+    const url = getApiEndpoint(subpath);
+    const headers = {};
+    if (window.interactiveMapConfig && window.interactiveMapConfig.nonce) {
+        headers['X-WP-Nonce'] = window.interactiveMapConfig.nonce;
+    }
+    return fetch(url, { headers });
+}
+
+function setupIslandDropdown() {
+    const dropdown = document.getElementById('island-select-dropdown');
+    if (!dropdown) return;
+
+    dropdown.innerHTML = '<option value="">All Islands (Overview)</option>';
+
+    const sortedEntries = Object.entries(REGION_NAMES).sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10));
+
+    sortedEntries.forEach(([id, name]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${name} (Region ${id})`;
+        dropdown.appendChild(option);
+    });
+
+    dropdown.addEventListener('change', (e) => {
+        const selectedId = e.target.value;
+        if (selectedId) {
+            selectRegion(selectedId, true);
+        } else {
+            showAllPlants(true);
+        }
+    });
+}
+
+function updateIslandDropdownCounts() {
+    const dropdown = document.getElementById('island-select-dropdown');
+    if (!dropdown) return;
+
+    dropdown.querySelectorAll('option').forEach(opt => {
+        const rid = opt.value;
+        if (!rid) return;
+        const count = regionCounts[rid] || 0;
+        const name = REGION_NAMES[rid] || `Island Group ${rid}`;
+        opt.textContent = `${name} (${count} ${count === 1 ? 'plant' : 'plants'})`;
+    });
+}
+
 function loadRegionCounts() {
-    fetch('/wp-json/interactive-map/v1/plants/counts')
+    apiFetch('/plants/counts')
         .then(r => r.json())
         .then(data => {
             if (data && data.regions) {
                 regionCounts = data.regions;
                 updateRegionTooltips();
+                updateIslandDropdownCounts();
             }
         })
         .catch(err => console.error('Error fetching region counts:', err));
@@ -80,33 +148,46 @@ function setupShowAllButton() {
     if (!showAllBtn) return;
 
     showAllBtn.addEventListener('click', () => {
-        currentRegionId = null;
-
-        // Deselect all highlighted map polygons
-        document.querySelectorAll('svg .selected').forEach(el => {
-            el.classList.remove('selected');
-        });
-
-        // Update sidebar header title
-        const sidebarHeader = document.querySelector('#plant-sidebar h2');
-        if (sidebarHeader) {
-            sidebarHeader.textContent = 'All Plants';
-        }
-
-        // Fetch all plant species across all islands
-        loadPlants(null);
+        showAllPlants(false);
     });
+}
+
+function showAllPlants(shouldScroll = false) {
+    currentRegionId = null;
+
+    // Deselect all highlighted map polygons
+    document.querySelectorAll('svg .selected').forEach(el => {
+        el.classList.remove('selected');
+    });
+
+    // Reset dropdown
+    const dropdown = document.getElementById('island-select-dropdown');
+    if (dropdown) {
+        dropdown.value = '';
+    }
+
+    // Update sidebar header title
+    const sidebarHeader = document.querySelector('#plant-sidebar h2');
+    if (sidebarHeader) {
+        sidebarHeader.textContent = 'All Plants';
+    }
+
+    // Fetch all plant species across all islands
+    loadPlants(null);
+
+    if (shouldScroll && window.innerWidth <= 960) {
+        const sidebar = document.getElementById('plant-sidebar');
+        if (sidebar) {
+            sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 }
 
 function loadPlants(region = null) {
     currentRegionId = region;
-    let endpoint = '/wp-json/interactive-map/v1/plants';
+    const subpath = region ? `/plants/${encodeURIComponent(region)}` : '/plants';
 
-    if (region) {
-        endpoint += '/' + region;
-    }
-
-    fetch(endpoint)
+    apiFetch(subpath)
         .then(r => r.json())
         .then(renderPlants)
         .catch(error => console.error(error));
@@ -274,7 +355,7 @@ function bindTextCaptionsToRegions() {
 }
 
 
-function selectRegion(regionId) {
+function selectRegion(regionId, shouldScroll = false) {
     if (!regionId || isNaN(regionId)) return;
 
     // Deselect all previously selected elements
@@ -288,6 +369,12 @@ function selectRegion(regionId) {
         el.classList.add('selected');
     });
 
+    // Sync dropdown selection if present
+    const dropdown = document.getElementById('island-select-dropdown');
+    if (dropdown && dropdown.value !== String(regionId)) {
+        dropdown.value = String(regionId);
+    }
+
     // Update sidebar title if header exists
     const sidebarHeader = document.querySelector('#plant-sidebar h2');
     if (sidebarHeader) {
@@ -295,6 +382,14 @@ function selectRegion(regionId) {
     }
 
     loadPlants(regionId);
+
+    // Auto-scroll on mobile/tablet viewports so user doesn't miss the updated results
+    if (shouldScroll || window.innerWidth <= 960) {
+        const sidebar = document.getElementById('plant-sidebar');
+        if (sidebar) {
+            sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 }
 
 function attachRegionEvents() {
@@ -309,7 +404,7 @@ function attachRegionEvents() {
                 if (regionId && !isNaN(regionId) && parseInt(regionId, 10) >= 1 && parseInt(regionId, 10) <= 22) {
                     e.preventDefault();
                     e.stopPropagation();
-                    selectRegion(regionId);
+                    selectRegion(regionId, true);
                     return;
                 }
                 target = target.parentElement;
@@ -329,7 +424,7 @@ function attachRegionEvents() {
 
         el.addEventListener('click', (e) => {
             e.stopPropagation();
-            selectRegion(regionId);
+            selectRegion(regionId, true);
         });
     });
 }

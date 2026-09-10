@@ -2,8 +2,9 @@
 
 namespace Ekelly\InteractiveMap\Frontend;
 
-class Shortcode
+use Ekelly\InteractiveMap\Assets\Assets;
 
+class Shortcode
 {
     public function register() {
         add_shortcode(
@@ -13,6 +14,8 @@ class Shortcode
     }
 
     public function render() {
+        (new Assets())->enqueue();
+
         ob_start();
 
         require IM_PLUGIN_PATH . 'templates/frontend/map.php';

@@ -1,7 +1,18 @@
 <div class="interactive-map-container">
     
-    <div class="map">
-        <?= file_get_contents(IM_PLUGIN_PATH . 'assets/svg/bs.svg'); ?>
+    <div class="map-wrapper">
+        <div class="map-mobile-helper">
+            <label for="island-select-dropdown" class="map-dropdown-label">Quick Island Selector:</label>
+            <div class="map-select-wrap">
+                <select id="island-select-dropdown" class="island-select-dropdown" aria-label="Select an island group">
+                    <option value="">All Islands (Overview)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="map">
+            <?= file_get_contents(IM_PLUGIN_PATH . 'assets/svg/bs.svg'); ?>
+        </div>
     </div>
 
     <aside id="plant-sidebar">
